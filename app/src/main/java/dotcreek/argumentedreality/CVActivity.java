@@ -36,7 +36,7 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_cv);
 
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mGestureDetector = createGestureDetector(this);

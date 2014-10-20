@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: C:\\Users\\Kevin\\Desktop\\Expo Ingenieria\\2014 I2C2 Interfaz Inteligente Cerebro-Computadora\\Software\\Android\\ArgumentedReality\\opencv-android\\src\\org\\opencv\\engine\\OpenCVEngineInterface.aidl
+ * Original file: C:\\Users\\Kevin\\Desktop\\Dotcreek\\ArgumentedReality\\opencv-android\\src\\org\\opencv\\engine\\OpenCVEngineInterface.aidl
  */
 package org.opencv.engine;
 /**

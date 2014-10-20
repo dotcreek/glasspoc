@@ -2,10 +2,10 @@
 <merger version="2" >
 
     <dataSet config="main" >
-        <source path="C:\Users\Kevin\Desktop\Expo Ingenieria\2014 I2C2 Interfaz Inteligente Cerebro-Computadora\Software\Android\ArgumentedReality\opencv-android\assets" />
+        <source path="C:\Users\Kevin\Desktop\Dotcreek\ArgumentedReality\opencv-android\assets" />
     </dataSet>
     <dataSet config="release" >
-        <source path="C:\Users\Kevin\Desktop\Expo Ingenieria\2014 I2C2 Interfaz Inteligente Cerebro-Computadora\Software\Android\ArgumentedReality\opencv-android\build-types\release\assets" />
+        <source path="C:\Users\Kevin\Desktop\Dotcreek\ArgumentedReality\opencv-android\build-types\release\assets" />
     </dataSet>
 
 </merger>

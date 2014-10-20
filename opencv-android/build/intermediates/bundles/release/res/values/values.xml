@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- From: file:/C:/Users/Kevin/Desktop/Expo%20Ingenieria/2014%20I2C2%20Interfaz%20Inteligente%20Cerebro-Computadora/Software/Android/ArgumentedReality/opencv-android/res/values/attrs.xml -->
+    <!-- From: file:/C:/Users/Kevin/Desktop/Dotcreek/ArgumentedReality/opencv-android/res/values/attrs.xml -->
     <eat-comment />
 
     <declare-styleable name="CameraBridgeViewBase">
