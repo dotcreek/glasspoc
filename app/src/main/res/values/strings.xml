@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Argumented Reality</string>
+    <string name="title_activity_main">Argumented Reality</string>
+    <string name="tap_for_options">"Tap" for options</string>
+    <string name="start">Start</string>
+    <string name="instructions">Instructions</string>
+
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="2" >
+
+    <dataSet config="main" >
+        <source path="C:\Users\Kevin\Desktop\Expo Ingenieria\2014 I2C2 Interfaz Inteligente Cerebro-Computadora\Software\Android\ArgumentedReality\opencv-android\assets" />
+    </dataSet>
+    <dataSet config="release" >
+        <source path="C:\Users\Kevin\Desktop\Expo Ingenieria\2014 I2C2 Interfaz Inteligente Cerebro-Computadora\Software\Android\ArgumentedReality\opencv-android\build-types\release\assets" />
+    </dataSet>
+
+</merger>
