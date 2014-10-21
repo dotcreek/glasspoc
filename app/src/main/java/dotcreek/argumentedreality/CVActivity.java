@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.WindowManager;
 
 import com.google.android.glass.media.Sounds;
 import com.google.android.glass.touchpad.Gesture;
@@ -16,7 +17,9 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 
 public class CVActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2{
@@ -33,10 +36,14 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
 
     /** OpenCV*/
     private CameraBridgeViewBase mOpenCvCameraView;
+    private Mat mRGB;
+    private Mat mGray;
+    private Mat mThreshold;
 
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_cv);
 
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -146,17 +153,26 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
 
     /**     Inicia camara       */
     public void onCameraViewStarted(int width, int height) {
+        mRGB = new Mat(height, width, CvType.CV_8UC4);
+        mGray = new Mat(height, width, CvType.CV_8UC1);
+        mThreshold = new Mat(height, width, CvType.CV_8UC1);
 
     }
 
     /**     Detiene camara       */
     public void onCameraViewStopped() {
-
+        mRGB.release();
+        mGray.release();
+        mThreshold.release();
     }
     /**     Recibe frame        */
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
-     return inputFrame.rgba();
+        mRGB =inputFrame.rgba();
+        mGray = inputFrame.gray();
+        Imgproc.threshold(mGray,mThreshold,128.0,255.0,Imgproc.THRESH_OTSU);
+
+     return mThreshold;
     }
 
 
