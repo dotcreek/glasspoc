@@ -20,6 +20,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -47,6 +48,9 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
     private Mat mThreshold;
     private Mat mBlur;
     private Mat mHierarchy;
+    private List<MatOfPoint> lstContours;
+    private List<MatOfPoint> lstSquares;
+    private MatOfPoint mPoints;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -181,15 +185,51 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
     /**     Recibe frame        */
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
+        //Matrices usadas
         mHierarchy = new Mat();
         mRGB =inputFrame.rgba();
         mGray = inputFrame.gray();
+
+        //Se aplica filtro gaussiano para elimitar ruido
         Imgproc.blur(mGray,mBlur,new Size(5, 5));
+
+        //Se aplica el umbral para separar el cuadrado negro
         Imgproc.threshold(mBlur,mThreshold,128.0,255.0,Imgproc.THRESH_OTSU);
-        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-        Imgproc.findContours(mThreshold,contours,mHierarchy,Imgproc.RETR_LIST,Imgproc.CHAIN_APPROX_NONE);
+
+        //Se buscan los contornos
+        lstContours = new ArrayList<MatOfPoint>();
+        Imgproc.findContours(mThreshold,lstContours,mHierarchy,Imgproc.RETR_LIST,Imgproc.CHAIN_APPROX_NONE);
         mHierarchy.release();
-        Imgproc.drawContours(mRGB,contours,-1, new Scalar(0, 255, 0));
+
+        //Se buscan los cuadrados en la imagen
+        lstSquares = new ArrayList<MatOfPoint>();
+        for(int i=0;i<lstContours.size();i++){
+
+            MatOfPoint tempContour=lstContours.get(i);
+            MatOfPoint2f mContour = new MatOfPoint2f(tempContour.toArray()); //Guardara el contour actual
+            MatOfPoint2f mApprox = new MatOfPoint2f(); //Aprox Curve
+
+            //lstContours.get(i).convertTo(mContour, CvType.CV_32FC2); //Se convierte el contour actual en Mat of pointf2 y se guarda en mContour
+
+            Imgproc.approxPolyDP(mContour,mApprox,tempContour.total()*0.02,true);
+
+            mPoints=new MatOfPoint(mApprox.toArray());
+            //mApprox.convertTo(lstContours.get(i), CvType.CV_32S); //Se convierte el approx en Mat Of Point y se coloca en la lista
+
+
+            //Log.i(TAG, "mPoints " +mPoints.toArray().length);
+            //if(mPoints.toArray().length==4 && (Math.abs(mApprox.total())>1000) && Imgproc.isContourConvex(mPoints)){
+            if(mPoints.toArray().length==4 && Imgproc.isContourConvex(mPoints)){
+                lstSquares.add(mPoints);
+            }
+        }
+
+        //Se dibuja  los cuadrados
+        Imgproc.drawContours(mRGB,lstSquares,-1, new Scalar(0, 255, 0));
+
+        //Se dibujan los contornos
+        //Imgproc.drawContours(mRGB,lstContours,-1, new Scalar(0, 255, 0));
+
      return mRGB;
     }
 
