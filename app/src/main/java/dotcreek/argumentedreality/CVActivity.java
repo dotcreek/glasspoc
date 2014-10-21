@@ -19,7 +19,13 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class CVActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2{
@@ -39,6 +45,8 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
     private Mat mRGB;
     private Mat mGray;
     private Mat mThreshold;
+    private Mat mBlur;
+    private Mat mHierarchy;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -155,7 +163,10 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
     public void onCameraViewStarted(int width, int height) {
         mRGB = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat(height, width, CvType.CV_8UC1);
-        mThreshold = new Mat(height, width, CvType.CV_8UC1);
+        mThreshold = new Mat();
+        mBlur = new Mat();
+        mHierarchy = new Mat();
+
 
     }
 
@@ -164,15 +175,22 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         mRGB.release();
         mGray.release();
         mThreshold.release();
+        mBlur.release();
+        mHierarchy.release();
     }
     /**     Recibe frame        */
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
+        mHierarchy = new Mat();
         mRGB =inputFrame.rgba();
         mGray = inputFrame.gray();
-        Imgproc.threshold(mGray,mThreshold,128.0,255.0,Imgproc.THRESH_OTSU);
-
-     return mThreshold;
+        Imgproc.blur(mGray,mBlur,new Size(5, 5));
+        Imgproc.threshold(mBlur,mThreshold,128.0,255.0,Imgproc.THRESH_OTSU);
+        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        Imgproc.findContours(mThreshold,contours,mHierarchy,Imgproc.RETR_LIST,Imgproc.CHAIN_APPROX_NONE);
+        mHierarchy.release();
+        Imgproc.drawContours(mRGB,contours,-1, new Scalar(0, 255, 0));
+     return mRGB;
     }
 
 
