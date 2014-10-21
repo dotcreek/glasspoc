@@ -17,6 +17,7 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -205,33 +206,54 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         lstSquares = new ArrayList<MatOfPoint>();
         for(int i=0;i<lstContours.size();i++){
 
+            //Contorno
             MatOfPoint tempContour=lstContours.get(i);
-            MatOfPoint2f mContour = new MatOfPoint2f(tempContour.toArray()); //Guardara el contour actual
-            MatOfPoint2f mApprox = new MatOfPoint2f(); //Aprox Curve
+            //Contorno convertido a MOPF2
+            MatOfPoint2f mContour = new MatOfPoint2f(tempContour.toArray());
+            //Aprox curve MOPF2 (Esquinas)
+            MatOfPoint2f mApprox = new MatOfPoint2f();
 
-            //lstContours.get(i).convertTo(mContour, CvType.CV_32FC2); //Se convierte el contour actual en Mat of pointf2 y se guarda en mContour
-
+            //Se procesan los contornos para obtener las esquinas
             Imgproc.approxPolyDP(mContour,mApprox,tempContour.total()*0.02,true);
 
+            //Se guardas las esquinas en una matriz de puntos
             mPoints=new MatOfPoint(mApprox.toArray());
-            //mApprox.convertTo(lstContours.get(i), CvType.CV_32S); //Se convierte el approx en Mat Of Point y se coloca en la lista
 
+            //Si tiene 4 esquinas, y es un contorno convexo, se detecta como cuadrado
+            //&& (Math.abs(Imgproc.contourArea(mApprox))>10)
 
-            //Log.i(TAG, "mPoints " +mPoints.toArray().length);
-            //if(mPoints.toArray().length==4 && (Math.abs(mApprox.total())>1000) && Imgproc.isContourConvex(mPoints)){
             if(mPoints.toArray().length==4 && Imgproc.isContourConvex(mPoints)){
-                lstSquares.add(mPoints);
+
+                //Se unen las cuatro esquinas para dibujar un cuadrado
+                dibujarCuadrado(mRGB,mPoints,new Scalar(255,0,0));
+                escribirPuntos(mRGB,mPoints,new Scalar(0,0,255));
+
             }
         }
 
-        //Se dibuja  los cuadrados
-        Imgproc.drawContours(mRGB,lstSquares,-1, new Scalar(0, 255, 0));
 
-        //Se dibujan los contornos
-        //Imgproc.drawContours(mRGB,lstContours,-1, new Scalar(0, 255, 0));
-
-     return mRGB;
+        return mRGB;
     }
+
+    /** Funcion que toma 4 puntos cardinales y crea lineas entre ellos para dibujar un cuadrado */
+    private void dibujarCuadrado(Mat imagen,MatOfPoint puntos,Scalar color){
+
+        Core.line(imagen, puntos.toArray()[0], puntos.toArray()[1], color,2);
+        Core.line(imagen, puntos.toArray()[1], puntos.toArray()[2], color,2);
+        Core.line(imagen, puntos.toArray()[2], puntos.toArray()[3], color,2);
+        Core.line(imagen, puntos.toArray()[3], puntos.toArray()[0], color,2);
+
+    }
+
+    private void escribirPuntos(Mat imagen,MatOfPoint puntos,Scalar color){
+        Core.putText(imagen, puntos.toArray()[0].toString(), puntos.toArray()[0], Core.FONT_ITALIC, 0.7, color, 2);
+        Core.putText(imagen, puntos.toArray()[1].toString(), puntos.toArray()[1], Core.FONT_ITALIC, 0.7, color, 2);
+        Core.putText(imagen, puntos.toArray()[2].toString(), puntos.toArray()[2], Core.FONT_ITALIC, 0.7, color, 2);
+        Core.putText(imagen, puntos.toArray()[3].toString(), puntos.toArray()[3], Core.FONT_ITALIC, 0.7, color, 2);
+    }
+
+
+
 
 
 
