@@ -15,6 +15,7 @@ import com.google.android.glass.touchpad.GestureDetector;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 
 
@@ -51,6 +52,7 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
 
     @Override
     protected void onResume() {
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this, mLoaderCallback);
         super.onResume();
 
     }
