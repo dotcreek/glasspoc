@@ -10,5 +10,9 @@
         android:id="@+id/instructions"
         android:title="@string/instructions"
         />
+    <item
+        android:id="@+id/main_calibrate"
+        android:title="@string/action_calibrate"
+        />
 
 </menu>

@@ -17,11 +17,15 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.MatOfPoint3f;
+import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -49,10 +53,11 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
     private Mat mThreshold;
     private Mat mBlur;
     private Mat mHierarchy;
+    private Mat mIntrinsics;
+    private MatOfDouble mDistortion;
     private List<MatOfPoint> lstContours;
-    private List<MatOfPoint> lstSquares;
     private MatOfPoint mPoints;
-
+    private CameraCalibrator mCalibrator;
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -166,6 +171,18 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
 
     /**     Inicia camara       */
     public void onCameraViewStarted(int width, int height) {
+
+        Log.i(TAG, "width height" + width + " " + height);
+
+        mCalibrator = new CameraCalibrator(width, height);
+        if (CalibrationResult.tryLoad(this, mCalibrator.getCameraMatrix(), mCalibrator.getDistortionCoefficients())) {
+            mCalibrator.setCalibrated();
+            mIntrinsics = new Mat();
+            mDistortion = new MatOfDouble();
+            mCalibrator.getCameraMatrix().copyTo(mIntrinsics);
+            mCalibrator.getDistortionCoefficients().copyTo(mDistortion);
+        }
+
         mRGB = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat(height, width, CvType.CV_8UC1);
         mThreshold = new Mat();
@@ -192,7 +209,7 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         mGray = inputFrame.gray();
 
         //Se aplica filtro gaussiano para elimitar ruido
-        Imgproc.blur(mGray,mBlur,new Size(5, 5));
+        Imgproc.blur(mGray,mBlur,new Size(3, 3));
 
         //Se aplica el umbral para separar el cuadrado negro
         Imgproc.threshold(mBlur,mThreshold,128.0,255.0,Imgproc.THRESH_OTSU);
@@ -203,7 +220,6 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         mHierarchy.release();
 
         //Se buscan los cuadrados en la imagen
-        lstSquares = new ArrayList<MatOfPoint>();
         for(int i=0;i<lstContours.size();i++){
 
             //Contorno
@@ -222,11 +238,24 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
             //Si tiene 4 esquinas, y es un contorno convexo, se detecta como cuadrado
             //&& (Math.abs(Imgproc.contourArea(mApprox))>10)
 
+            //Numero de vertices ----> Convexo -------> Tamaño del contorno
+            //if(mPoints.toArray().length==4 && Imgproc.isContourConvex(mPoints) && (int)Math.abs(Imgproc.contourArea(mApprox))>100){
             if(mPoints.toArray().length==4 && Imgproc.isContourConvex(mPoints)){
+                Log.i(TAG, "Contorno = "+ Math.abs(Imgproc.contourArea(mApprox)));
+
+                MatOfPoint3f objectPoints = new MatOfPoint3f(new Point3(-1,-1,0),new Point3(-1,1,0), new Point3(1,1,0),new Point3(1,-1,0));
+                Mat rvec = new Mat();
+                Mat tvec= new Mat();
+                Calib3d.solvePnP(objectPoints,mApprox,mIntrinsics,mDistortion,rvec,tvec);
 
                 //Se unen las cuatro esquinas para dibujar un cuadrado
-                dibujarCuadrado(mRGB,mPoints,new Scalar(255,0,0));
-                escribirPuntos(mRGB,mPoints,new Scalar(0,0,255));
+                dibujarCuadrado(mRGB, mPoints, new Scalar(255, 0, 0));
+                //escribirPuntos(mRGB,mPoints,new Scalar(0,0,255));
+
+                MatOfPoint3f linea3d = new MatOfPoint3f(new Point3(0,0,0),new Point3(0,0,1));
+                MatOfPoint2f linea2d = new MatOfPoint2f();
+                Calib3d.projectPoints(linea3d, rvec, tvec, mIntrinsics, mDistortion, linea2d);
+                Core.line(mRGB,linea2d.toArray()[0],linea2d.toArray()[1],new Scalar(0,255,0),2);
 
             }
         }
@@ -241,7 +270,7 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         Core.line(imagen, puntos.toArray()[0], puntos.toArray()[1], color,2);
         Core.line(imagen, puntos.toArray()[1], puntos.toArray()[2], color,2);
         Core.line(imagen, puntos.toArray()[2], puntos.toArray()[3], color,2);
-        Core.line(imagen, puntos.toArray()[3], puntos.toArray()[0], color,2);
+        Core.line(imagen, puntos.toArray()[3], puntos.toArray()[0], color, 2);
 
     }
 

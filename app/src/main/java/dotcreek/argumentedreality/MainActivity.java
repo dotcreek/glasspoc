@@ -17,7 +17,7 @@ import com.google.android.glass.touchpad.GestureDetector;
 
 public class MainActivity extends Activity {
 
-
+    /** Handler del menu */
     private final Handler mHandler = new Handler();
 
     /** Audio manager usado para reproducir efectos de sonido */
@@ -31,15 +31,14 @@ public class MainActivity extends Activity {
         super.onCreate(bundle);
         setContentView(R.layout.activity_main);
 
+
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mGestureDetector = createGestureDetector(this);
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
     }
 
     @Override
@@ -52,6 +51,23 @@ public class MainActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_principal, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu (Menu menu) {
+
+        if (CalibrationResult.tryLoadMain(MainActivity.this) == false){
+            menu.findItem(R.id.start).setEnabled(false);
+            menu.findItem(R.id.instructions).setEnabled(false);
+        }
+        else{
+            menu.findItem(R.id.start).setEnabled(true);
+            menu.findItem(R.id.instructions).setEnabled(true);
+        }
+        super.onPrepareOptionsMenu(menu);
+
+
         return true;
     }
 
@@ -73,6 +89,14 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         startInstructions();
+                    }
+                });
+                return true;
+            case R.id.main_calibrate:
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        startCalibration();
                     }
                 });
                 return true;
@@ -147,13 +171,21 @@ public class MainActivity extends Activity {
     }
 
 
-    private void startApp() {
+
+    /**     Inicio de actividades        */
+    private void startApp(){
         startActivity(new Intent(this, CVActivity.class));
         finish();
     }
 
     private void startInstructions() {
-        startActivity(new Intent(this, InstructionsActivity.class));
+        startActivity(new Intent(this, InstructionsActivity.class)); //Cambiar
     }
+
+    private void startCalibration() {
+        startActivity(new Intent(this, CameraCalibrationActivity.class)); //Cambiar
+    }
+
+
 
 }
