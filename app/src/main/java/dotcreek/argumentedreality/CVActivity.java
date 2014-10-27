@@ -25,7 +25,9 @@ import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.MatOfPoint3f;
+import org.opencv.core.Point;
 import org.opencv.core.Point3;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -209,11 +211,11 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         mGray = inputFrame.gray();
 
         //Se aplica filtro gaussiano para elimitar ruido
-        Imgproc.blur(mGray,mBlur,new Size(3, 3));
+        //Imgproc.blur(mGray,mBlur,new Size(3, 3));
 
         //Se aplica el umbral para separar el cuadrado negro
-        Imgproc.threshold(mBlur,mThreshold,128.0,255.0,Imgproc.THRESH_OTSU);
-
+        //Imgproc.threshold(mBlur,mThreshold,128.0,255.0,Imgproc.THRESH_OTSU);
+        Imgproc.adaptiveThreshold(mGray,mThreshold,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY_INV,7,7);
         //Se buscan los contornos
         lstContours = new ArrayList<MatOfPoint>();
         Imgproc.findContours(mThreshold,lstContours,mHierarchy,Imgproc.RETR_LIST,Imgproc.CHAIN_APPROX_NONE);
@@ -239,9 +241,20 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
             //&& (Math.abs(Imgproc.contourArea(mApprox))>10)
 
             //Numero de vertices ----> Convexo -------> Tamaño del contorno
-            //if(mPoints.toArray().length==4 && Imgproc.isContourConvex(mPoints) && (int)Math.abs(Imgproc.contourArea(mApprox))>100){
-            if(mPoints.toArray().length==4 && Imgproc.isContourConvex(mPoints)){
-                Log.i(TAG, "Contorno = "+ Math.abs(Imgproc.contourArea(mApprox)));
+            if(mPoints.toArray().length==4 && Imgproc.isContourConvex(mPoints) && (int)Math.abs(Imgproc.contourArea(mApprox))>100){
+           //if(mPoints.toArray().length==4 && Imgproc.isContourConvex(mPoints)){
+
+
+
+                MatOfPoint2f mDest = new MatOfPoint2f(new Point(0,0),new Point(99,0),new Point(99,99),new Point(0,99));
+                MatOfPoint2f mOrigin = new MatOfPoint2f(mPoints.toArray());
+                Mat mCanonical = new Mat(100,100,mRGB.type());
+                Mat m = new Mat();
+                m = Imgproc.getPerspectiveTransform(mOrigin,mDest);
+                Imgproc.warpPerspective(mRGB, mCanonical, m, new Size(100,100));
+
+                mCanonical.copyTo(mRGB.submat(new Rect(0 ,0 ,100, 100)));
+
 
                 MatOfPoint3f objectPoints = new MatOfPoint3f(new Point3(-1,-1,0),new Point3(-1,1,0), new Point3(1,1,0),new Point3(1,-1,0));
                 Mat rvec = new Mat();
