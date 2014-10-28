@@ -17,17 +17,12 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.MatOfPoint3f;
-import org.opencv.core.Point;
-import org.opencv.core.Point3;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -49,17 +44,24 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
     private GestureDetector mGestureDetector;
 
     /** OpenCV*/
-    private CameraBridgeViewBase mOpenCvCameraView;
     private Mat mRGB;
     private Mat mGray;
     private Mat mThreshold;
     private Mat mBlur;
     private Mat mHierarchy;
+    private Mat mCanonical;
     private Mat mIntrinsics;
     private MatOfDouble mDistortion;
-    private List<MatOfPoint> lstContours;
+    private MatOfPoint mTempContour;
     private MatOfPoint mPoints;
-    private CameraCalibrator mCalibrator;
+    private MatOfPoint2f mContour ;
+    private MatOfPoint2f mApprox ;
+    private CameraBridgeViewBase mOpenCvCameraView;
+    private List<MatOfPoint> lstContours;
+
+    /** Procesamiento de marcas */
+    private MarkerProcessor mpProcesador;
+
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -73,7 +75,7 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.image_manipulations_activity_surface_view);
         mOpenCvCameraView.enableFpsMeter();
         mOpenCvCameraView.setCvCameraViewListener(this);
-        //mOpenCvCameraView.setMaxFrameSize(600,337);
+        //mOpenCvCameraView.setMaxFrameSize(800,600);
 
     }
 
@@ -176,7 +178,7 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
 
         Log.i(TAG, "width height" + width + " " + height);
 
-        mCalibrator = new CameraCalibrator(width, height);
+        CameraCalibrator mCalibrator = new CameraCalibrator(width, height);
         if (CalibrationResult.tryLoad(this, mCalibrator.getCameraMatrix(), mCalibrator.getDistortionCoefficients())) {
             mCalibrator.setCalibrated();
             mIntrinsics = new Mat();
@@ -190,6 +192,7 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         mThreshold = new Mat();
         mBlur = new Mat();
         mHierarchy = new Mat();
+        mpProcesador = new MarkerProcessor();
 
 
     }
@@ -211,11 +214,12 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         mGray = inputFrame.gray();
 
         //Se aplica filtro gaussiano para elimitar ruido
-        //Imgproc.blur(mGray,mBlur,new Size(3, 3));
+        Imgproc.blur(mGray,mBlur,new Size(3, 3));
+        Imgproc.threshold(mBlur,mThreshold,128.0,255.0,Imgproc.THRESH_OTSU);
 
         //Se aplica el umbral para separar el cuadrado negro
-        //Imgproc.threshold(mBlur,mThreshold,128.0,255.0,Imgproc.THRESH_OTSU);
-        Imgproc.adaptiveThreshold(mGray,mThreshold,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY_INV,7,7);
+       // Imgproc.adaptiveThreshold(mGray,mThreshold,255,Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,Imgproc.THRESH_BINARY_INV,7,7);
+
         //Se buscan los contornos
         lstContours = new ArrayList<MatOfPoint>();
         Imgproc.findContours(mThreshold,lstContours,mHierarchy,Imgproc.RETR_LIST,Imgproc.CHAIN_APPROX_NONE);
@@ -224,56 +228,62 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         //Se buscan los cuadrados en la imagen
         for(int i=0;i<lstContours.size();i++){
 
-            //Contorno
-            MatOfPoint tempContour=lstContours.get(i);
+            //Contorno Temporal
+            mTempContour=lstContours.get(i);
             //Contorno convertido a MOPF2
-            MatOfPoint2f mContour = new MatOfPoint2f(tempContour.toArray());
-            //Aprox curve MOPF2 (Esquinas)
-            MatOfPoint2f mApprox = new MatOfPoint2f();
+            mContour = new MatOfPoint2f(mTempContour.toArray());
+            //Aprox curve MOPF2 (Esquinas/Puntos)
+            mApprox = new MatOfPoint2f();
 
-            //Se procesan los contornos para obtener las esquinas
-            Imgproc.approxPolyDP(mContour,mApprox,tempContour.total()*0.02,true);
+            if(mContour.total() > mRGB.cols()/5) {
 
-            //Se guardas las esquinas en una matriz de puntos
-            mPoints=new MatOfPoint(mApprox.toArray());
+                //Se procesan los contornos para obtener las esquinas
+                Imgproc.approxPolyDP(mContour, mApprox, mTempContour.total() * 0.02, true);
 
-            //Si tiene 4 esquinas, y es un contorno convexo, se detecta como cuadrado
-            //&& (Math.abs(Imgproc.contourArea(mApprox))>10)
+                //Se guardas las esquinas en una matriz de puntos
+                mPoints = new MatOfPoint(mApprox.toArray());
 
-            //Numero de vertices ----> Convexo -------> Tamaño del contorno
-            if(mPoints.toArray().length==4 && Imgproc.isContourConvex(mPoints) && (int)Math.abs(Imgproc.contourArea(mApprox))>100){
-           //if(mPoints.toArray().length==4 && Imgproc.isContourConvex(mPoints)){
-
+                //Numero de vertices ----> Convexo -------> Tamaño del contorno
+                if (mPoints.toArray().length == 4 && Imgproc.isContourConvex(mPoints) && (int) Math.abs(Imgproc.contourArea(mApprox)) > 100) {
+                    //if(mPoints.toArray().length==4 && Imgproc.isContourConvex(mPoints)){
 
 
-                MatOfPoint2f mDest = new MatOfPoint2f(new Point(0,0),new Point(99,0),new Point(99,99),new Point(0,99));
-                MatOfPoint2f mOrigin = new MatOfPoint2f(mPoints.toArray());
-                Mat mCanonical = new Mat(100,100,mRGB.type());
-                Mat m = new Mat();
-                m = Imgproc.getPerspectiveTransform(mOrigin,mDest);
-                Imgproc.warpPerspective(mRGB, mCanonical, m, new Size(100,100));
-
-                mCanonical.copyTo(mRGB.submat(new Rect(0 ,0 ,100, 100)));
+                   /** Se camba la perspectiva de la marca */
+                   mCanonical = mpProcesador.CambiarPerspectiva(mPoints,mGray);
 
 
-                MatOfPoint3f objectPoints = new MatOfPoint3f(new Point3(-1,-1,0),new Point3(-1,1,0), new Point3(1,1,0),new Point3(1,-1,0));
-                Mat rvec = new Mat();
-                Mat tvec= new Mat();
-                Calib3d.solvePnP(objectPoints,mApprox,mIntrinsics,mDistortion,rvec,tvec);
+                    /** Se calcula el ID de la marca */
+                    int nRotations = 0;
+                    int id = mpProcesador.CalcularID(mCanonical,nRotations);
 
-                //Se unen las cuatro esquinas para dibujar un cuadrado
-                dibujarCuadrado(mRGB, mPoints, new Scalar(255, 0, 0));
-                //escribirPuntos(mRGB,mPoints,new Scalar(0,0,255));
 
-                MatOfPoint3f linea3d = new MatOfPoint3f(new Point3(0,0,0),new Point3(0,0,1));
-                MatOfPoint2f linea2d = new MatOfPoint2f();
-                Calib3d.projectPoints(linea3d, rvec, tvec, mIntrinsics, mDistortion, linea2d);
-                Core.line(mRGB,linea2d.toArray()[0],linea2d.toArray()[1],new Scalar(0,255,0),2);
+                    if (id != -1) {
+                        escribirID(mRGB, mPoints, new Scalar(0, 0, 255), id);
+                        //Se unen las cuatro esquinas para dibujar un cuadrado
+                        dibujarCuadrado(mRGB, mPoints, new Scalar(255, 0, 0));
+                        //escribirPuntos(mRGB,mPoints,new Scalar(0,0,255));
+                    }
 
+                    //Se establecen los parametros 3D
+                    //MatOfPoint3f objectPoints = new MatOfPoint3f(new Point3(-1, -1, 0), new Point3(-1, 1, 0), new Point3(1, 1, 0), new Point3(1, -1, 0));
+                    //Mat rvec = new Mat();
+                    //Mat tvec = new Mat();
+                    //Calib3d.solvePnP(objectPoints, mApprox, mIntrinsics, mDistortion, rvec, tvec);
+
+                    //Se dibuja una linea 3D
+                    //MatOfPoint3f linea3d = new MatOfPoint3f(new Point3(0, 0, 0), new Point3(0, 0, 1));
+                    //MatOfPoint2f linea2d = new MatOfPoint2f();
+                    //Calib3d.projectPoints(linea3d, rvec, tvec, mIntrinsics, mDistortion, linea2d);
+                    //Core.line(mRGB, linea2d.toArray()[0], linea2d.toArray()[1], new Scalar(0, 255, 0), 2);
+
+
+                    //Preview del marker
+                    //mCanonical.convertTo(mCanonical,mRGB.type());
+                    //mCanonical.copyTo(mGray.submat(new Rect(0, 0, 70, 70)));
+
+                }
             }
         }
-
-
         return mRGB;
     }
 
@@ -292,6 +302,11 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         Core.putText(imagen, puntos.toArray()[1].toString(), puntos.toArray()[1], Core.FONT_ITALIC, 0.7, color, 2);
         Core.putText(imagen, puntos.toArray()[2].toString(), puntos.toArray()[2], Core.FONT_ITALIC, 0.7, color, 2);
         Core.putText(imagen, puntos.toArray()[3].toString(), puntos.toArray()[3], Core.FONT_ITALIC, 0.7, color, 2);
+    }
+
+    private void escribirID(Mat imagen,MatOfPoint puntos,Scalar color,int ID){
+        Core.putText(imagen, "ID: "+ID, puntos.toArray()[0], Core.FONT_ITALIC, 0.7, color, 2);
+
     }
 
 
