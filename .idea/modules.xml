@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/ArgumentedReality.iml" filepath="$PROJECT_DIR$/ArgumentedReality.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/opencv-android/opencv-android.iml" filepath="$PROJECT_DIR$/opencv-android/opencv-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rajawali/rajawali.iml" filepath="$PROJECT_DIR$/rajawali/rajawali.iml" />
     </modules>
   </component>
 </project>

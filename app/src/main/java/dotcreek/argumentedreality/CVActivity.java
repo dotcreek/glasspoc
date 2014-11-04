@@ -1,12 +1,12 @@
 package dotcreek.argumentedreality;
 
-import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import com.google.android.glass.media.Sounds;
 import com.google.android.glass.touchpad.Gesture;
@@ -14,6 +14,7 @@ import com.google.android.glass.touchpad.GestureDetector;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.calib3d.Calib3d;
@@ -33,13 +34,17 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.List;
 
+import rajawali.RajawaliActivity;
 
-public class CVActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2{
+
+public class CVActivity extends RajawaliActivity implements CameraBridgeViewBase.CvCameraViewListener2{
 
     /**     Variables    */
 
     //region TAG del log
     private static final String TAG = "CV ArgumentedReality";
+    private static final int HEIGHT = 360;
+    private static final int WIDTH = 600;
     //endregion
 
     //region Controlador de audio
@@ -74,7 +79,7 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
     //endregion+
 
     //region Variables OpenGL
-
+    private OpenGLRenderer mRenderer;
     //endregion
 
 
@@ -83,11 +88,10 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
     //region Funciones OnCreate OnDestroy OnResume OnPause
 
     @Override
-    protected void onCreate(Bundle bundle) {
+    public void onCreate(Bundle bundle) {
 
         super.onCreate(bundle);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(R.layout.activity_cv);
 
         /* Controlador de audio */
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -96,10 +100,22 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
         mGestureDetector = createGestureDetector(this);
 
          /*Configuración del OpenCV*/
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.image_manipulations_activity_surface_view);
-        mOpenCvCameraView.enableFpsMeter();
+        mOpenCvCameraView = (CameraBridgeViewBase) new JavaCameraView(this, -1);
         mOpenCvCameraView.setCvCameraViewListener(this);
-        //mOpenCvCameraView.setMaxFrameSize(800,600);
+        mOpenCvCameraView.enableFpsMeter();
+        mOpenCvCameraView.setMaxFrameSize(WIDTH,HEIGHT);
+
+        /*Configuración OpenGL*/
+        mSurfaceView.setZOrderMediaOverlay(true);
+        setGLBackgroundTransparent(true);
+        mRenderer = new OpenGLRenderer(this);
+        mRenderer.setSurfaceView(mSurfaceView);
+        super.setRenderer(mRenderer);
+
+        mLayout.addView(mOpenCvCameraView);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(WIDTH,HEIGHT);
+        mLayout.setLayoutParams(layoutParams);
+        mOpenCvCameraView.setLayoutParams(new FrameLayout.LayoutParams(WIDTH,HEIGHT));
 
     }
 
@@ -205,6 +221,7 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
 
         Log.i(TAG, "width height" + width + " " + height);
 
+
         /* Se obtienen los valores de calibración */
         CameraCalibrator mCalibrator = new CameraCalibrator(width, height);
         if (CalibrationResult.tryLoad(this, mCalibrator.getCameraMatrix(), mCalibrator.getDistortionCoefficients())) {
@@ -292,6 +309,12 @@ public class CVActivity extends Activity implements CameraBridgeViewBase.CvCamer
                         //Se unen las cuatro esquinas para dibujar un cuadrado
                         dibujarCuadrado(mRGB, mPoints, new Scalar(255, 0, 0));
                         //escribirPuntos(mRGB,mPoints,new Scalar(0,0,255));
+
+                        //Prueba
+                        double x = (mPoints.toArray()[0].x + mPoints.toArray()[2].x)/2;
+                        double y = (mPoints.toArray()[0].y + mPoints.toArray()[2].y)/2;
+                        mRenderer.NewPosition((int)x,(int)y,0);
+                        //Fin prueba
                     }
 
                      /* Se establecen los parametros 3D */
