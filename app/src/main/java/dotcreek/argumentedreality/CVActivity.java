@@ -310,15 +310,19 @@ public class CVActivity extends RajawaliActivity implements CameraBridgeViewBase
                         dibujarCuadrado(mRGB, mPoints, new Scalar(255, 0, 0));
                         //escribirPuntos(mRGB,mPoints,new Scalar(0,0,255));
 
-                        //Prueba
-                        double x = (mPoints.toArray()[0].x + mPoints.toArray()[2].x)/2;
-                        double y = (mPoints.toArray()[0].y + mPoints.toArray()[2].y)/2;
-                        mRenderer.NewPosition((int)x,(int)y,0);
-                        //Fin prueba
+                         /* Se establecen los parametros 3D */
+                        configuración3D();
+                        //dibujarLinea(mRGB);
+                        //Log.i("Prueba","tvec 0"+ tvec.get(0,0)[0]);
+                        //Log.i("Prueba","tvec1"+ tvec.get(1,0)[0]);
+                        //Log.i("Prueba","tvec2"+ tvec.get(2,0)[0]);
+                        mRenderer.NewPosition(tvec.get(0,0)[0],tvec.get(1,0)[0],tvec.get(2,0)[0]);
+                        mRenderer.NewRotation(rvec.get(0,0)[0],rvec.get(1,0)[0],rvec.get(2,0)[0]);
+                        Log.i("prueba","rvec" + rvec.get(0,0)[0]);
+
                     }
 
-                     /* Se establecen los parametros 3D */
-                    configuración3D();
+
 
                     /*//Preview del marker
                     mCanonical.convertTo(mCanonical,mRGB.type());

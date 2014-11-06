@@ -212,7 +212,7 @@ public class Object3D extends ATransformable3D implements Comparable<Object3D>, 
 	 * @param vpMatrix {@link Matrix4} The view-projection matrix
 	 * @param projMatrix {@link Matrix4} The projection matrix
 	 * @param vMatrix {@link Matrix4} The view matrix
-	 * @param pickerInfo The current color picker info. This is only used when an object is touched.
+	 * param pickerInfo The current color picker info. This is only used when an object is touched.
 	 */
 	public void render(Camera camera, final Matrix4 vpMatrix, final Matrix4 projMatrix, 
 			final Matrix4 vMatrix, Material sceneMaterial) {
@@ -227,7 +227,7 @@ public class Object3D extends ATransformable3D implements Comparable<Object3D>, 
 	 * @param projMatrix {@link Matrix4} The projection matrix
 	 * @param vMatrix {@link Matrix4} The view matrix
 	 * @param parentMatrix {@link Matrix4} This object's parent matrix
-	 * @param pickerInfo The current color picker info. This is only used when an object is touched.
+	 * param pickerInfo The current color picker info. This is only used when an object is touched.
 	 */
 	public void render(Camera camera, final Matrix4 vpMatrix, final Matrix4 projMatrix, final Matrix4 vMatrix, 
 			final Matrix4 parentMatrix, Material sceneMaterial) {
@@ -281,7 +281,7 @@ public class Object3D extends ATransformable3D implements Comparable<Object3D>, 
 
 			if (!mIsPartOfBatch) {				
 				if (material == null) {
-					RajLog.e("[" + this.getClass().getName()
+					RajLog.e("[" + this.getName()
 							+ "] This object can't render because there's no material attached to it.");
 					throw new RuntimeException(
 							"This object can't render because there's no material attached to it.");
@@ -367,7 +367,7 @@ public class Object3D extends ATransformable3D implements Comparable<Object3D>, 
 	protected void checkGlError(String op) {
 		int error;
 		while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
-			RajLog.e(op + ": glError " + error + " in class " + this.getClass().getName());
+			RajLog.e(op + ": glError " + error + " in class " + this.getName());
 			throw new RuntimeException(op + ": glError " + error);
 		}
 	}
@@ -445,7 +445,7 @@ public class Object3D extends ATransformable3D implements Comparable<Object3D>, 
 	 * Use this together with the alpha channel when calling BaseObject3D.setColor(): 0xaarrggbb. So for 50% transparent
 	 * red, set transparent to true and call: * <code>setColor(0x7fff0000);</code>
 	 * 
-	 * @param transparent
+	 * param transparent
 	 */
 	public void setTransparent(boolean value) {
 		mTransparent = value;

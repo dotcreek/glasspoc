@@ -62,6 +62,7 @@ public class CameraCalibrationActivity extends Activity implements CvCameraViewL
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.camera_calibration_java_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+        mOpenCvCameraView.setMaxFrameSize(600,360);
     }
 
     /**     Funciones Pause Resume Destroy      */
@@ -176,7 +177,7 @@ public class CameraCalibrationActivity extends Activity implements CvCameraViewL
         if (mWidth != width || mHeight != height) {
             mWidth = width;
             mHeight = height;
-            mCalibrator = new CameraCalibrator(800, 480);
+            mCalibrator = new CameraCalibrator(600, 360);
             if (CalibrationResult.tryLoad(this, mCalibrator.getCameraMatrix(), mCalibrator.getDistortionCoefficients())) {
                 mCalibrator.setCalibrated();
             }

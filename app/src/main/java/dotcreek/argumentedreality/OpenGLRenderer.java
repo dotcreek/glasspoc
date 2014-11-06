@@ -32,7 +32,7 @@ public class OpenGLRenderer extends RajawaliRenderer {
 		mLight.setPower(2);
 
 		LoaderOBJ objParser = new LoaderOBJ(mContext.getResources(),
-				mTextureManager, R.raw.multiobjects_obj);
+				mTextureManager, R.raw.camaro_obj);
 
 		try {
 			objParser.parse();
@@ -44,7 +44,7 @@ public class OpenGLRenderer extends RajawaliRenderer {
 
 		m3DObject = objParser.getParsedObject();
 		m3DObject.setPosition(0, 0, 0);
-		m3DObject.setScale(0.07f);
+		m3DObject.setScale(0.3f);
         getCurrentScene().addChild(m3DObject);
 		//IsInitialized = true;
 
@@ -56,10 +56,16 @@ public class OpenGLRenderer extends RajawaliRenderer {
 
 	}
 
-    public void NewPosition(int x, int y, int z){
+    public void NewPosition(double x, double y, double z){
 
-        m3DObject.setPosition(x, y, z);
+        z -= 5;
+        m3DObject.setPosition(x, -y, -z);
 
+    }
+
+    public void NewRotation(double x, double y, double z){
+
+        m3DObject.setRotation(x*7,y*7,z*7);
     }
 	
 	public boolean getState() {
