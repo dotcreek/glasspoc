@@ -7,7 +7,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:icon="@drawable/ic_glass_logo"
             android:label="@string/title_activity_main">
 
@@ -20,7 +20,7 @@
                 android:resource="@xml/voice_trigger" />
         </activity>
 
-        <activity android:name=".CVActivity"
+        <activity android:name=".activities.CVActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".CameraCalibrationActivity"
+        <activity android:name=".activities.CameraCalibrationActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

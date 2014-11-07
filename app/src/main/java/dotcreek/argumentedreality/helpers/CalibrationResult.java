@@ -1,23 +1,31 @@
-package dotcreek.argumentedreality;
+package dotcreek.argumentedreality.helpers;
 
 
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
 import org.opencv.core.Mat;
+
+/**
+ * External Class from OpenCV.org for CameraCalibration
+ * Edited by Kevin Alfaro for AugmentedReality Magazine
+ * 2014
+ */
+
 public abstract class CalibrationResult {
-    private static final String TAG = "OCVSample::CalibrationResult";
+
+    private static final String TAG = "CameraCalibration::CalibrationResult";
 
     private static final int CAMERA_MATRIX_ROWS = 3;
     private static final int CAMERA_MATRIX_COLS = 3;
     private static final int DISTORTION_COEFFICIENTS_SIZE = 5;
 
+
+    /* Save calibration parameters in desafult shared preferences */
     public static void save(Activity activity, Mat cameraMatrix, Mat distortionCoefficients) {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);
-        //SharedPreferences sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
 
         double[] cameraMatrixArray = new double[CAMERA_MATRIX_ROWS * CAMERA_MATRIX_COLS];
@@ -41,6 +49,7 @@ public abstract class CalibrationResult {
         Log.i(TAG, "Saved distortion coefficients: " + distortionCoefficients.dump());
     }
 
+    /* Load calibration parameters */
     public static boolean tryLoad(Activity activity, Mat cameraMatrix, Mat distortionCoefficients) {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);
@@ -70,6 +79,7 @@ public abstract class CalibrationResult {
         return true;
     }
 
+    /* Search if camera is calibrated */
     public static boolean tryLoadMain(Activity activity) {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);

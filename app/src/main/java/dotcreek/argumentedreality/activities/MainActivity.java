@@ -1,4 +1,4 @@
-package dotcreek.argumentedreality;
+package dotcreek.argumentedreality.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -13,6 +13,9 @@ import android.view.MotionEvent;
 import com.google.android.glass.media.Sounds;
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
+
+import dotcreek.argumentedreality.helpers.CalibrationResult;
+import dotcreek.argumentedreality.R;
 
 
 public class MainActivity extends Activity {

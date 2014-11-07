@@ -1,4 +1,4 @@
-package dotcreek.argumentedreality;
+package dotcreek.argumentedreality.activities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -27,8 +27,22 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 
+import dotcreek.argumentedreality.helpers.CalibrationFrameRender;
+import dotcreek.argumentedreality.helpers.CalibrationResult;
+import dotcreek.argumentedreality.helpers.CameraCalibrator;
+import dotcreek.argumentedreality.helpers.OnCameraFrameRender;
+import dotcreek.argumentedreality.helpers.PreviewFrameRender;
+import dotcreek.argumentedreality.R;
+
+
+/**
+ * External Class from OpenCV.org for CameraCalibration
+ * Edited by Kevin Alfaro for AugmentedReality Magazine
+ * 2014
+ */
+
 public class CameraCalibrationActivity extends Activity implements CvCameraViewListener2 {
-    private static final String TAG = "Log::CameraCalibrationActivity";
+    private static final String TAG = "CameraCalibration::CameraCalibrationActivity";
 
     /** OpenCV  */
     private CameraBridgeViewBase mOpenCvCameraView;
@@ -102,21 +116,6 @@ public class CameraCalibrationActivity extends Activity implements CvCameraViewL
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            /*case R.id.calibration:
-                mOnCameraFrameRender =
-                        new OnCameraFrameRender(new CalibrationFrameRender(mCalibrator));
-                item.setChecked(true);
-                return true;
-            case R.id.undistortion:
-                mOnCameraFrameRender =
-                        new OnCameraFrameRender(new UndistortionFrameRender(mCalibrator));
-                item.setChecked(true);
-                return true;
-            case R.id.comparison:
-                mOnCameraFrameRender =
-                        new OnCameraFrameRender(new ComparisonFrameRender(mCalibrator, mWidth, mHeight, getResources()));
-                item.setChecked(true);
-                return true;*/
             case R.id.calibrate:
                 final Resources res = getResources();
                 //Si no se tienen los samp,es requeridos, se solicitan mas

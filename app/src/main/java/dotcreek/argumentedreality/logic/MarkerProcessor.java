@@ -1,5 +1,4 @@
-package dotcreek.argumentedreality;
-
+package dotcreek.argumentedreality.logic;
 
 
 import org.opencv.core.Core;
@@ -15,32 +14,75 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.List;
 
+import dotcreek.argumentedreality.utils.Pair;
+
+/**
+ * Class that process the markers. Validate the marker and calculate the ID.
+ * (This class have some external functions. Avoid to edit those)
+ * By Kevin Alfaro for AugmentedReality Magazine
+ * 2014
+ */
+
 public class MarkerProcessor {
 
+    /* Constantes */
+    private static final int ROI_SIZE = 70;
 
-    MatOfPoint2f mDest;
+    /* Variables */
+    MatOfPoint2f mDestination;
 
+
+    /* Constructor */
     public MarkerProcessor(){
 
-       mDest = new MatOfPoint2f(new Point(0, 0), new Point(69, 0), new Point(69, 69), new Point(0, 69));
+       //Matriz que contendra el marker con perspectiva regular
+       mDestination = new MatOfPoint2f(new Point(0, 0), new Point(69, 0), new Point(69, 69), new Point(0, 69));
 
     }
 
-    //Funcion que cambia la perspectiva del marker para tener una forma regular y poder comprobar validez del mismo
-    public Mat CambiarPerspectiva(MatOfPoint puntos, Mat mGris){
+    /* Funcion que devuelve todos los Markers Validos que se encontraban en los Markers posibles */
+    public List<Marker> getValidMarkers(List<MatOfPoint> possibleMarkers,Mat grayInputFrame){
+
+        List<Marker> lstValidMarkers = new ArrayList();
+
+        if(possibleMarkers.size()>0) {
+
+            for (int i = 0; i < possibleMarkers.size(); i++) {
+
+            /* Se cambia la perspectiva de la marca */
+                Mat mCanonical = CambiarPerspectiva(possibleMarkers.get(i), grayInputFrame);
+
+
+            /* Se calcula el ID de la marca */
+                int nRotations = 0;
+                int id = CalcularID(mCanonical, nRotations);
+                if (id != -1) {
+                    //Es un marker valido
+                    Marker mMarker = new Marker(id, possibleMarkers.get(i));
+                    lstValidMarkers.add(mMarker);
+                }
+            }
+        }
+
+
+        return lstValidMarkers;
+    }
+
+    /* Funcion que cambia la perspectiva del marker para tener una forma regular y poder comprobar validez del mismo */
+    private Mat CambiarPerspectiva(MatOfPoint puntos, Mat mGris){
 
 
         Mat mOrigin = new MatOfPoint2f(puntos.toArray());
-        Mat mCanonical = new Mat(70, 70, mGris.type());
+        Mat mCanonical = new Mat(ROI_SIZE, ROI_SIZE, mGris.type());
         Mat m = new Mat();
-        m = Imgproc.getPerspectiveTransform(mOrigin, mDest);
-        Imgproc.warpPerspective(mGris, mCanonical, m, new Size(70, 70));
+        m = Imgproc.getPerspectiveTransform(mOrigin, mDestination);
+        Imgproc.warpPerspective(mGris, mCanonical, m, new Size(ROI_SIZE, ROI_SIZE));
 
         return mCanonical;
     }
 
-
-    public int CalcularID(Mat marca,int nRotations){
+    /* Funcion que calcula el ID de un marker */
+    private int CalcularID(Mat marca,int nRotations){
 
         Imgproc.threshold(marca, marca, 125, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
         int sCelda = marca.rows()/7; //Tamaño de la celda
@@ -50,7 +92,7 @@ public class MarkerProcessor {
         {
             int inc=6; //Incremento
 
-            if (y==0 || y==6) inc=1; //Solo comprueba el borde
+            if (y==0 || y==6) inc=1; //Solo comprueba el borde (Las filas y columnas 0 y 6)
 
             for (int x=0;x<7;x+=inc)
             {
@@ -71,8 +113,6 @@ public class MarkerProcessor {
         //Se calcula el ID de la marca segun la información dentro del marco negro
         Mat mBits = new Mat();
         mBits = Mat.zeros(5,5, CvType.CV_8UC1);
-
-        //get information(for each inner square, determine if it is black or white)
         for (int y=0;y<5;y++)
         {
             for (int x=0;x<5;x++)
@@ -88,11 +128,10 @@ public class MarkerProcessor {
                     //La celda es blanca
                     double[] uno ={1,0,0};
                     mBits.put(y,x,uno);
-                    //PUT LOG
                 }
             }
         }
-        //Se buscan todas las posibles rotaciones
+        //Se buscan todas las posibles rotaciones para que el marker pueda ser detectado sin importar su rotación
         List<Mat> rotations = new ArrayList<Mat>();
         for (int i = 0; i < 5; i++) {
             rotations.add(new Mat());
@@ -107,7 +146,7 @@ public class MarkerProcessor {
 
         for (int i=1; i<4; i++)
         {
-            //get the hamming distance to the nearest possible word
+
             rotations.set(i,rotate(rotations.get(i-1)));
             distances[i] = hammDistMarker(rotations.get(i));
 
@@ -127,9 +166,8 @@ public class MarkerProcessor {
         return -1;
     }
 
-
-    private Mat rotate(Mat in)
-    {
+    /* Funcion que rota el marker */
+    private Mat rotate(Mat in){
         Mat out = new Mat();
         in.copyTo(out);
         for (int i=0;i<in.rows();i++)
@@ -144,7 +182,7 @@ public class MarkerProcessor {
         return out;
     }
 
-
+    /* Algoritmo externo para determinar si el marker es valido NO EDITAR!*/
     private int hammDistMarker(Mat bits){
         int ids[][]={
             {1,0,0,0,0},
@@ -182,8 +220,8 @@ public class MarkerProcessor {
         return dist;
     }
 
-    private int mat2id( Mat bits)
-    {
+    /* Algoritmo externo para determinar el valor binario del marker NO EDITAR!*/
+    private int mat2id( Mat bits){
 
         int val=0;
         for (int y=0;y<5;y++)

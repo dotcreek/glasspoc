@@ -1,4 +1,4 @@
-package dotcreek.argumentedreality;
+package dotcreek.argumentedreality.helpers;
 
 import android.util.Log;
 
@@ -16,8 +16,14 @@ import org.opencv.core.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * External Class from OpenCV.org for CameraCalibration
+ * Edited by Kevin Alfaro for AugmentedReality Magazine
+ * 2014
+ */
+
 public class CameraCalibrator {
-    private static final String TAG = "OCVSample::CameraCalibrator";
+    private static final String TAG = "CameraCalibration::CameraCalibrator";
 
     private final Size mPatternSize = new Size(4, 11);
     private final int mCornersSize = (int)(mPatternSize.width * mPatternSize.height);
@@ -95,8 +101,7 @@ public class CameraCalibrator {
         corners.put(0, 0, positions);
     }
 
-    private double computeReprojectionErrors(List<Mat> objectPoints,
-                                             List<Mat> rvecs, List<Mat> tvecs, Mat perViewErrors) {
+    private double computeReprojectionErrors(List<Mat> objectPoints,List<Mat> rvecs, List<Mat> tvecs, Mat perViewErrors) {
         MatOfPoint2f cornersProjected = new MatOfPoint2f();
         double totalError = 0;
         double error;

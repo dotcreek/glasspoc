@@ -1,4 +1,10 @@
-package dotcreek.argumentedreality;
+package dotcreek.argumentedreality.utils;
+
+/**
+ * Generic Java Pair Class
+ * By Kevin Alfaro for AugmentedReality Magazine
+ * 2014
+ */
 
 public class Pair<F, S> {
     private F first; //first member of pair
