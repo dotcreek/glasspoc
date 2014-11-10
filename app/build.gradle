@@ -8,11 +8,11 @@ repositories {
 }
 
 android {
-    compileSdkVersion "Google Inc.:Glass Development Kit Preview:19"
+    compileSdkVersion 'Google Inc.:Glass Development Kit Preview:19'
     buildToolsVersion "20.0.0"
 
     defaultConfig {
-        applicationId "dotcreek.argumentedreality"
+        applicationId "dotcreek.ar_magazine"
         minSdkVersion 19
         targetSdkVersion 19
         versionCode 1
@@ -28,6 +28,4 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':opencv-android')
-    compile project(':rajawali')
 }
