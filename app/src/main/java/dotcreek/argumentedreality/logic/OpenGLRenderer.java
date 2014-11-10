@@ -61,13 +61,13 @@ public class OpenGLRenderer extends RajawaliRenderer {
 	}
 
     public void NewPosition(double x, double y, double z){
-        z -= 5;
+
         m3DObject.setPosition(x, -y, -z);
 
     }
 
     public void NewRotation(double x, double y, double z){
-        m3DObject.setRotation(x*7,y*7,z*7);
+        m3DObject.setRotation(x,y,z);
     }
 	
 	public boolean getState() {

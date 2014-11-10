@@ -22,11 +22,11 @@ import java.util.List;
 public class ImageProcessor {
 
     //Constante que divide un frame, para detenerminar el tamaño minimo de un cuadrado (Entre menos divisor, el tamaño minimo es mayor)
-    private static final int DIVISOR = 5;
+    private static final int DIVISOR = 6;
     //Vertices que tienen los poligonos a buscar (se mantiene en 4 porque los markers son cuadrados o rectangulos)
     private static final int POLYGON_VERTICES = 4;
     //Determina el perimetro minimo que deben tener los cuadrados
-    private static final int MIN_SIZE_SQUARE = 100 ;
+    private static final int MIN_SIZE_SQUARE = 50 ;
 
     //Matrices de filtracion basica
     private Mat mRGB;
