@@ -5,13 +5,13 @@ Vuforia is a trademark of QUALCOMM Incorporated, registered in the United States
 and other countries. Trademarks of QUALCOMM Incorporated are used with permission.
 ===============================================================================*/
 
-package dotcreek.ar_magazine.utils;
+package dotcreek.ar_magazine.interfaces;
 
 import com.qualcomm.vuforia.State;
 
 
 //  Interface to be implemented by the activity which uses SampleApplicationSession
-public interface SampleApplicationControl
+public interface ApplicationControl
 {
     
     // To be called to initialize the trackers
@@ -30,19 +30,12 @@ public interface SampleApplicationControl
     // To be called to stop the trackers
     boolean doStopTrackers();
     
-    
-    // To be called to destroy the trackers' data
-    boolean doUnloadTrackersData();
-    
-    
-    // To be called to deinitialize the trackers
-    boolean doDeinitTrackers();
-    
+
     
     // This callback is called after the Vuforia initialization is complete,
     // the trackers are initialized, their data loaded and
     // tracking is ready to start
-    void onInitARDone(SampleApplicationException e);
+    void onInitARDone();
     
     
     // This callback is called every cycle

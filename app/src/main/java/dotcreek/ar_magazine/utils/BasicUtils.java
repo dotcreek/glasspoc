@@ -11,7 +11,7 @@ import android.opengl.GLES20;
 import android.util.Log;
 
 
-public class SampleUtils
+public class BasicUtils
 {
     
     private static final String LOGTAG = "Vuforia_Sample_Applications";
