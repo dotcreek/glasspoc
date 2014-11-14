@@ -76,6 +76,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume()
     {
+        super.onResume();
 
         try{
             mainManager.resumeAR();
@@ -90,7 +91,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause()
     {
-
+        super.onPause();
         try
         {
             mainManager.pauseAR();

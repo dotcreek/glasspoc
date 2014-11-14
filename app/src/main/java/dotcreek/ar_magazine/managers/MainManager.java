@@ -66,7 +66,7 @@ public class MainManager implements ApplicationControl{
     DataSet dataSetVideoTargets = null;
 
     // Movie for the Targets
-    public static final int NUM_TARGETS = 2;
+    public static final int NUM_TARGETS = 1;
     public static final int VIDEO = 0;
     private VideoPlayerHelper mVideoPlayerHelper[] = null;
     private int mSeekPosition[] = null;

@@ -820,7 +820,7 @@ public class MainRenderManager implements GLSurfaceView.Renderer {
 
             // We store the modelview matrix to be used later by the tap
             // calculation
-            if (imageTarget.getName().compareTo("video") == 0)
+            if (imageTarget.getName().compareTo("stones") == 0)
                 currentTarget = MainManager.VIDEO;
 
             //vid
