@@ -4,10 +4,9 @@
         android:icon="@drawable/ic_launcher" android:theme="@style/AppTheme">
 
         <activity
-            android:name="FrameMarkers"
+            android:name=".activities.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
-            android:noHistory="true"
-            >
+            android:noHistory="true">
 
             <intent-filter>
                 <action android:name="com.google.android.glass.action.VOICE_TRIGGER" />
