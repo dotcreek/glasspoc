@@ -4,7 +4,7 @@
         android:icon="@drawable/ic_launcher" android:theme="@style/AppTheme">
 
         <activity
-            android:name="FrameMarkers"
+            android:name=".activities.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
             android:noHistory="true"
             >
@@ -24,8 +24,8 @@
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="com.google.android.glass.permission.DEVELOPMENT" />
 
 </manifest>

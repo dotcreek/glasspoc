@@ -24,11 +24,11 @@ public interface ApplicationControl
     
     // To be called to start tracking with the initialized trackers and their
     // loaded data
-    boolean doStartTrackers();
+    void doStartTrackers();
     
     
     // To be called to stop the trackers
-    boolean doStopTrackers();
+    void doStopTrackers();
     
 
     
