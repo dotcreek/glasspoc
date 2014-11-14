@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import com.qualcomm.vuforia.Vuforia;
 
 import dotcreek.ar_magazine.interfaces.ApplicationControl;
+import dotcreek.ar_magazine.utils.DebugUtil;
 
 /**
  * DotCreek
@@ -35,6 +36,9 @@ public class VuforiaManager {
     // Vuforia Engine AsycnTask
     private  InitVuforiaTask vuforiaInitializer;
 
+    //Debug utility
+    DebugUtil debugUtil = new DebugUtil();
+
 
     public VuforiaManager(Object synchronizer,Activity activity,ApplicationControl control){
 
@@ -61,6 +65,7 @@ public class VuforiaManager {
             // Prevent the onDestroy() method to overlap with initialization:
             synchronized (objSynchronizer)
             {
+                debugUtil.LogInfo(debugUtil.TAG_VUFORIAMANAGER,"Vuforia Set Init Parameters");
                 Vuforia.setInitParameters(mainActivity, Vuforia.GL_20);
 
                 do
@@ -70,6 +75,7 @@ public class VuforiaManager {
                     // progress in percents (0 ... 100%).
                     // If Vuforia.init() returns -1, it indicates an error.
                     // Initialization is done when progress has reached 100%.
+                    debugUtil.LogInfo(debugUtil.TAG_VUFORIAMANAGER,"Vuforia Init");
                     intProgressValue = Vuforia.init();
 
                     // Publish the progress value:
@@ -115,20 +121,25 @@ public class VuforiaManager {
                         trackerLoader.execute();
                     }
                     catch (Exception e){
-                        //Loading tracking data set failed finish()
+
+                        debugUtil.LogError(debugUtil.TAG_VUFORIAMANAGER,"Loading tracking data set failed");
+                        mainActivity.finish();
 
                     }
 
                 }
                 else{
 
-                            //Failed to initialize trackers finish()
+                    debugUtil.LogError(debugUtil.TAG_VUFORIAMANAGER,"Failed to initialize trackers");
+                    mainActivity.finish();
                 }
 
             }
             else{
 
-            //Failed to initialize Vuforia finish()
+                debugUtil.LogError(debugUtil.TAG_VUFORIAMANAGER,"Failed to initialize Vuforia");
+                mainActivity.finish();
+
 
             }
         }
@@ -155,7 +166,7 @@ public class VuforiaManager {
 
             if (!result)
             {
-                //Failed to load tracker data.
+                debugUtil.LogError(debugUtil.TAG_VUFORIAMANAGER,"Failed to load tracker data");
             }
             else
             {
@@ -173,6 +184,7 @@ public class VuforiaManager {
 
             // Done loading the tracker, update application status
             mainManagerControl.onInitARDone();
+            debugUtil.LogInfo(debugUtil.TAG_VUFORIAMANAGER,"Done loading the trackers");
         }
     }
 

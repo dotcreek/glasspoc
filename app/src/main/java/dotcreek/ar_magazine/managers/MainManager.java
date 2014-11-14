@@ -18,6 +18,7 @@ import com.qualcomm.vuforia.Vuforia;
 import java.util.Vector;
 
 import dotcreek.ar_magazine.interfaces.ApplicationControl;
+import dotcreek.ar_magazine.utils.DebugUtil;
 import dotcreek.ar_magazine.utils.LoadingDialogUtil;
 import dotcreek.ar_magazine.utils.Texture;
 
@@ -58,9 +59,12 @@ public class MainManager implements ApplicationControl{
     // Array of markers
     private Marker dataSet[];
 
+    //Debug utility
+    DebugUtil debugUtil = new DebugUtil();
 
     public MainManager(Activity activity,RelativeLayout layout){
 
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"Main manager constructor");
         // Get the UI
         mainActivity = activity;
         layoutUserInterface = layout;
@@ -75,6 +79,7 @@ public class MainManager implements ApplicationControl{
     // This function show a loading spin while application managers are charging
     public void startLoadingAnimation(RelativeLayout layout){
 
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"StartLoadingAnimation Function");
         // Create the loadingDialogUtil and set the layout
         loadingDialogUtil = new LoadingDialogUtil(layout);
 
@@ -88,6 +93,7 @@ public class MainManager implements ApplicationControl{
 
     public void startVuforiaManager(){
 
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"StartVuforiaManager Function");
         vuforiaManager = new VuforiaManager(objSinchronizer,mainActivity,this);
 
 
@@ -96,6 +102,7 @@ public class MainManager implements ApplicationControl{
     // Load any specific textures for 3D objects
     public void loadTextures(){
 
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"Load textures function");
         vectorTextures = new Vector<Texture>();
         vectorTextures.add(Texture.loadTextureFromApk("FrameMarkers/letter_Q.png",mainActivity.getAssets()));
         vectorTextures.add(Texture.loadTextureFromApk("FrameMarkers/letter_C.png",mainActivity.getAssets()));
@@ -106,6 +113,7 @@ public class MainManager implements ApplicationControl{
 
     // Function that clear the textures vector
     public void unloadTextures(){
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"Unload textures function");
         vectorTextures.clear();
         vectorTextures = null;
 
@@ -194,6 +202,7 @@ public class MainManager implements ApplicationControl{
     @Override
     public boolean doInitTrackers()
     {
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"DoInitTrackers");
         // Indicate if the trackers were initialized correctly
         boolean result;
 
@@ -204,10 +213,12 @@ public class MainManager implements ApplicationControl{
 
         if(markerTracker == null){
             result = false;
+            debugUtil.LogError(debugUtil.TAG_MAINMANAGER,"Failed Initialize MarkerTracker");
         }
         else{
 
             result = true;
+            debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"MarkerTracker Initialized!");
         }
 
         return result;
@@ -218,6 +229,7 @@ public class MainManager implements ApplicationControl{
     @Override
     public boolean doLoadTrackersData(){
 
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"LoadTrackersData");
         TrackerManager tManager = TrackerManager.getInstance();
         MarkerTracker markerTracker = (MarkerTracker)tManager.getTracker(MarkerTracker.getClassType());
         if (markerTracker == null)
@@ -255,7 +267,7 @@ public class MainManager implements ApplicationControl{
         }
 
 
-        //Successfully initialized MarkerTracker
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"Succesfully LoadTrackerData");
 
         return true;
 
@@ -264,6 +276,7 @@ public class MainManager implements ApplicationControl{
 
     @Override
     public boolean doStartTrackers(){
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"DoStartTrackers");
         // Indicate if the trackers were started correctly
         boolean result = true;
 
@@ -279,6 +292,7 @@ public class MainManager implements ApplicationControl{
 
     @Override
     public boolean doStopTrackers(){
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"DoStopTrackers");
         // Indicate if the trackers were stopped correctly
         boolean result = true;
 
@@ -294,6 +308,7 @@ public class MainManager implements ApplicationControl{
 
     public void deinitTrackers()
     {
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"deinitTrackers");
         TrackerManager tManager = TrackerManager.getInstance();
         tManager.deinitTracker(MarkerTracker.getClassType());
     }
@@ -302,6 +317,7 @@ public class MainManager implements ApplicationControl{
     @Override
     public void onInitARDone(){
 
+        debugUtil.LogInfo(debugUtil.TAG_MAINMANAGER,"OnInitARDone");
         // OpenGL ES view
         int depthSize = 16;
         int stencilSize = 0;

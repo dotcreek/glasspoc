@@ -27,6 +27,7 @@ import dotcreek.ar_magazine.media.QObject;
 import dotcreek.ar_magazine.media.RObject;
 import dotcreek.ar_magazine.utils.BasicUtils;
 import dotcreek.ar_magazine.utils.CubeShaders;
+import dotcreek.ar_magazine.utils.DebugUtil;
 import dotcreek.ar_magazine.utils.Texture;
 
 /**
@@ -63,6 +64,9 @@ public class RenderManager implements GLSurfaceView.Renderer {
     private CObject cObject = new CObject();
     private AObject aObject = new AObject();
     private RObject rObject = new RObject();
+
+    //Debug utility
+    DebugUtil debugUtil = new DebugUtil();
 
 
     public RenderManager(CameraManager camera)
