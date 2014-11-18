@@ -20,7 +20,6 @@ import com.google.android.glass.touchpad.GestureDetector;
 
 import dotcreek.ar_magazine.R;
 import dotcreek.ar_magazine.managers.MainManager;
-import dotcreek.ar_magazine.utils.DebugUtil;
 
 
 /**
@@ -39,13 +38,9 @@ public class MainActivity extends Activity {
     private AudioManager audioManager;
     private GestureDetector gestureDetector;
 
-    //Debug utility
-    DebugUtil debugUtil = new DebugUtil();
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        debugUtil.LogInfo(debugUtil.TAG_MAINACTIVITY,"OnCreate function");
         super.onCreate(savedInstanceState);
 
         // Set Landscape Orientation
@@ -81,7 +76,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume()
     {
-        debugUtil.LogInfo(debugUtil.TAG_MAINACTIVITY,"OnResume function");
         super.onResume();
 
         try{
@@ -89,7 +83,7 @@ public class MainActivity extends Activity {
         }
         catch (Exception e)
         {
-            debugUtil.LogError(debugUtil.TAG_MAINACTIVITY,"ResumeAr try failed");
+            // Debug message
         }
 
     }
@@ -97,15 +91,13 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause()
     {
-        debugUtil.LogInfo(debugUtil.TAG_MAINACTIVITY,"OnPause function");
         super.onPause();
-
         try
         {
             mainManager.pauseAR();
         } catch (Exception e)
         {
-            debugUtil.LogError(debugUtil.TAG_MAINACTIVITY,"PauseAr try failed");
+            // Debug Message
         }
     }
 
@@ -113,7 +105,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy()
     {
-        debugUtil.LogInfo(debugUtil.TAG_MAINACTIVITY,"OnDestroy function");
         super.onDestroy();
 
         try
@@ -121,7 +112,7 @@ public class MainActivity extends Activity {
             mainManager.stopAR();
         } catch (Exception e)
         {
-            debugUtil.LogError(debugUtil.TAG_MAINACTIVITY,"StopAr try failed");
+            // Debug Message
         }
     }
 
@@ -167,7 +158,8 @@ public class MainActivity extends Activity {
                 if (gesture == Gesture.TAP) {
 
                     audioManager.playSoundEffect(Sounds.TAP);
-                    openOptionsMenu();
+                    //openOptionsMenu();
+                    mainManager.startVideo();
                     return true;
                 }
                 else if (gesture == Gesture.SWIPE_DOWN) {
@@ -207,9 +199,6 @@ public class MainActivity extends Activity {
         }
         return false;
     }
-
-
-
 
 
 }

@@ -15,7 +15,6 @@ import com.qualcomm.vuforia.VideoMode;
 import com.qualcomm.vuforia.Vuforia;
 
 import dotcreek.ar_magazine.interfaces.ApplicationControl;
-import dotcreek.ar_magazine.utils.DebugUtil;
 
 /**
  * DotCreek
@@ -38,9 +37,6 @@ public class CameraManager {
 
     private Activity mainActivity;
     private ApplicationControl mainManagerControl;
-
-    //Debug utility
-    DebugUtil debugUtil = new DebugUtil();
 
     public CameraManager(Activity activity,ApplicationControl control){
         mainManagerControl = control;

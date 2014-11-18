@@ -10,8 +10,6 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 
-import dotcreek.ar_magazine.utils.DebugUtil;
-
 /**
  * DotCreek
  * Augmented Reality Magazine For Glass
@@ -23,9 +21,6 @@ import dotcreek.ar_magazine.utils.DebugUtil;
 public class SurfaceViewManager extends GLSurfaceView{
 
     private static final String LOGTAG = "Vuforia_SampleGLView";
-
-    //Debug utility
-    DebugUtil debugUtil = new DebugUtil();
 
 
     // Constructor.
