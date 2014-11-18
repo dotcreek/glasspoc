@@ -20,7 +20,6 @@ import com.qualcomm.vuforia.Vuforia;
 
 import java.util.Vector;
 
-import dotcreek.ar_magazine.helpers.VideoPlayerHelper;
 import dotcreek.ar_magazine.interfaces.ApplicationControl;
 import dotcreek.ar_magazine.utils.LoadingDialogUtil;
 import dotcreek.ar_magazine.utils.Texture;
@@ -51,8 +50,12 @@ public class MainManager implements ApplicationControl{
     // The Vuforia Engine Manager
     private VuforiaManager vuforiaManager;
 
+    // The videoplayback Manager
+    private VideoManager videoManager;
+
     // Textures for rendering
     private Vector<Texture> vectorTextures;
+    private Vector<Texture> vectorVideoTextures;
 
     // Interface control
     private Activity mainActivity;
@@ -65,16 +68,6 @@ public class MainManager implements ApplicationControl{
     //Image Dataset
     DataSet dataSetVideoTargets = null;
 
-    // Movie for the Targets
-    public static final int NUM_TARGETS = 1;
-    public static final int VIDEO = 0;
-    private VideoPlayerHelper mVideoPlayerHelper[] = null;
-    private int mSeekPosition[] = null;
-    private boolean mWasPlaying[] = null;
-    private String mMovieName[] = null;
-
-    // A boolean to indicate whether we come from full screen:
-    private boolean mReturningFromFullScreen = false;
 
 
     public MainManager(Activity activity,RelativeLayout layout){
@@ -86,23 +79,6 @@ public class MainManager implements ApplicationControl{
         // Set the camera Manager
         cameraManager = new CameraManager(activity,this);
 
-        //region videotest
-        mVideoPlayerHelper = new VideoPlayerHelper[NUM_TARGETS];
-        mSeekPosition = new int[NUM_TARGETS];
-        mWasPlaying = new boolean[NUM_TARGETS];
-        mMovieName = new String[NUM_TARGETS];
-
-        // Create the video player helper that handles the playback of the movie
-        // for the targets:
-        for (int i = 0; i < NUM_TARGETS; i++)
-        {
-            mVideoPlayerHelper[i] = new VideoPlayerHelper();
-            mVideoPlayerHelper[i].init();
-            mVideoPlayerHelper[i].setActivity(mainActivity);
-        }
-
-        mMovieName[VIDEO] = "VideoPlayback/VuforiaSizzleReel_1.m4v";
-        //endregion
 
     }
 
@@ -126,44 +102,50 @@ public class MainManager implements ApplicationControl{
 
         vuforiaManager = new VuforiaManager(objSinchronizer,mainActivity,this);
 
+    }
 
+    public void startVideo(){
+
+        videoManager.startVideo();
     }
 
     // Load any specific textures for 3D objects
     public void loadTextures(){
 
+        // 3D Textures
         vectorTextures = new Vector<Texture>();
         vectorTextures.add(Texture.loadTextureFromApk("FrameMarkers/letter_Q.png",mainActivity.getAssets()));
         vectorTextures.add(Texture.loadTextureFromApk("FrameMarkers/letter_C.png",mainActivity.getAssets()));
         vectorTextures.add(Texture.loadTextureFromApk("FrameMarkers/letter_A.png",mainActivity.getAssets()));
         vectorTextures.add(Texture.loadTextureFromApk("FrameMarkers/letter_R.png",mainActivity.getAssets()));
 
-        //region videotest
 
-        vectorTextures.add(Texture.loadTextureFromApk(
-                "VideoPlayback/VuforiaSizzleReel_1.png", mainActivity.getAssets()));
-        vectorTextures.add(Texture.loadTextureFromApk(
-                "VideoPlayback/VuforiaSizzleReel_2.png", mainActivity.getAssets()));
-        vectorTextures.add(Texture.loadTextureFromApk("VideoPlayback/play.png",
-                mainActivity.getAssets()));
-        vectorTextures.add(Texture.loadTextureFromApk("VideoPlayback/busy.png",
-                mainActivity.getAssets()));
-        vectorTextures.add(Texture.loadTextureFromApk("VideoPlayback/error.png",
-                mainActivity.getAssets()));
+        // Video textures
+        vectorVideoTextures = new Vector<Texture>();
+        vectorVideoTextures.add(Texture.loadTextureFromApk("VideoPlayback/dcframe.png",mainActivity.getAssets()));
+        vectorVideoTextures.add(Texture.loadTextureFromApk("VideoPlayback/play.png",mainActivity.getAssets()));
+        vectorVideoTextures.add(Texture.loadTextureFromApk("VideoPlayback/busy.png",mainActivity.getAssets()));
+        vectorVideoTextures.add(Texture.loadTextureFromApk("VideoPlayback/error.png",mainActivity.getAssets()));
 
-        //endregion
 
     }
 
     // Function that clear the textures vector
     public void unloadTextures(){
+
+        //3D Textures
         vectorTextures.clear();
         vectorTextures = null;
+
+        //Video Textures
+        vectorVideoTextures.clear();
+        vectorVideoTextures = null;
 
         // Garbage collector
         System.gc();
 
     }
+
 
     /**     Application lifecycle Functions       */
     // This function stop the Vuforia manager and its AsyncTask, also stops the camera ald call the textures unloader.
@@ -177,7 +159,6 @@ public class MainManager implements ApplicationControl{
         if (vuforiaTask != null && vuforiaTask.getStatus() != VuforiaManager.InitVuforiaTask.Status.FINISHED){
             vuforiaTask.cancel(true);
         }
-
         if (trackerTask != null && trackerTask.getStatus() != VuforiaManager.LoadTrackerTask.Status.FINISHED){
             trackerTask.cancel(true);
         }
@@ -200,18 +181,13 @@ public class MainManager implements ApplicationControl{
             Vuforia.deinit();
         }
 
+        //Set vector of textures null
         unloadTextures();
 
-        //region videotest
-        for (int i = 0; i < NUM_TARGETS; i++)
-        {
-            // If the activity is destroyed we need to release all resources:
-            if (mVideoPlayerHelper[i] != null)
-                mVideoPlayerHelper[i].deinit();
-            mVideoPlayerHelper[i] = null;
-        }
-        //endregion
+        //Relase video resources
+        videoManager.stopVideo();
     }
+
 
     // Function that resumes Vuforia, restarts the trackers and the camera
     public void resumeAR()
@@ -231,26 +207,9 @@ public class MainManager implements ApplicationControl{
             surfaceViewManager.onResume();
         }
 
-        //region videotest
         // Reload all the movies
-        if (mainRenderManager != null)
-        {
-            for (int i = 0; i < NUM_TARGETS; i++)
-            {
-                if (!mReturningFromFullScreen)
-                {
-                    mainRenderManager.requestLoad(i, mMovieName[i], mSeekPosition[i],
-                            false);
-                } else
-                {
-                    mainRenderManager.requestLoad(i, mMovieName[i], mSeekPosition[i],
-                            mWasPlaying[i]);
-                }
-            }
-        }
+        videoManager.resumeVideo();
 
-        mReturningFromFullScreen = false;
-        //endregion
     }
 
     // Pauses Vuforia and stops the camera and Opengl
@@ -271,28 +230,9 @@ public class MainManager implements ApplicationControl{
             surfaceViewManager.onPause();
         }
 
-        //region videotest
-        // Store the playback state of the movies and unload them:
-        for (int i = 0; i < NUM_TARGETS; i++)
-        {
-            // If the activity is paused we need to store the position in which
-            // this was currently playing:
-            if (mVideoPlayerHelper[i].isPlayableOnTexture())
-            {
-                mSeekPosition[i] = mVideoPlayerHelper[i].getCurrentPosition();
-                mWasPlaying[i] = mVideoPlayerHelper[i].getStatus() == VideoPlayerHelper.MEDIA_STATE.PLAYING ? true
-                        : false;
-            }
+        // Pause movies
+        videoManager.pauseVideo();
 
-            // We also need to release the resources used by the helper, though
-            // we don't need to destroy it:
-            if (mVideoPlayerHelper[i] != null)
-                mVideoPlayerHelper[i].unload();
-
-        }
-
-        mReturningFromFullScreen = false;
-        //endregion
     }
 
     /**     Aplication control Callbacks     */
@@ -303,9 +243,12 @@ public class MainManager implements ApplicationControl{
         // Indicate if the trackers were initialized correctly
         boolean result = true;
 
+        //Object that control all trackers
         TrackerManager trackerManager = TrackerManager.getInstance();
+
         // Initialize the marker tracker
         trackerManager.initTracker(MarkerTracker.getClassType());
+
         // Initialize the image tracker
         trackerManager.initTracker(ImageTracker.getClassType());
 
@@ -318,10 +261,11 @@ public class MainManager implements ApplicationControl{
         // Indicate if the trackers were unloaded correctly
         boolean result = true;
 
-        // Get the image tracker:
+        //Object that control all trackers
         TrackerManager trackerManager = TrackerManager.getInstance();
-        ImageTracker imageTracker = (ImageTracker) trackerManager
-                .getTracker(ImageTracker.getClassType());
+
+        //Image tracker
+        ImageTracker imageTracker = (ImageTracker) trackerManager.getTracker(ImageTracker.getClassType());
         if (imageTracker == null)
         {
 
@@ -331,12 +275,12 @@ public class MainManager implements ApplicationControl{
         if (dataSetVideoTargets != null)
         {
             if (imageTracker.getActiveDataSet() == dataSetVideoTargets
-                    && !imageTracker.deactivateDataSet(dataSetVideoTargets))
-            {
+                    && !imageTracker.deactivateDataSet(dataSetVideoTargets)){
 
                 result = false;
-            } else if (!imageTracker.destroyDataSet(dataSetVideoTargets))
-            {
+
+            }
+            else if (!imageTracker.destroyDataSet(dataSetVideoTargets)){
 
                 result = false;
             }
@@ -351,9 +295,10 @@ public class MainManager implements ApplicationControl{
     @Override
     public boolean doLoadTrackersData(){
 
+        //Object that control all trackers
         TrackerManager trackerManager = TrackerManager.getInstance();
 
-        //MarckerTracker Dataset
+        //MarkerTracker Dataset
         MarkerTracker markerTracker = (MarkerTracker)trackerManager.getTracker(MarkerTracker.getClassType());
         if (markerTracker == null)
             return false;
@@ -405,8 +350,8 @@ public class MainManager implements ApplicationControl{
             return false;
         }
 
-        // Load the data sets:
-        if (!dataSetVideoTargets.load("StonesAndChips.xml",
+        // Load the data sets of imsge targets
+        if (!dataSetVideoTargets.load("dcbanners.xml",
                 STORAGE_TYPE.STORAGE_APPRESOURCE))
         {
 
@@ -431,12 +376,15 @@ public class MainManager implements ApplicationControl{
     @Override
     public void doStartTrackers(){
 
-        // Start the tracker
+        //Object that control all trackers
         TrackerManager trackerManager = TrackerManager.getInstance();
+
+        //MarkerTracker
         MarkerTracker markerTracker = (MarkerTracker) trackerManager.getTracker(MarkerTracker.getClassType());
         if (markerTracker != null)
             markerTracker.start();
 
+        //Image Tracker
         Tracker imageTracker = TrackerManager.getInstance().getTracker(ImageTracker.getClassType());
         if (imageTracker != null)
         {
@@ -450,8 +398,6 @@ public class MainManager implements ApplicationControl{
 
     @Override
     public void doStopTrackers(){
-        // Indicate if the trackers were stopped correctly
-        boolean result = true;
 
         // Stop MarkerTracker
         TrackerManager tManager = TrackerManager.getInstance();
@@ -471,9 +417,12 @@ public class MainManager implements ApplicationControl{
 
     public void deinitTrackers()
     {
+        //Object that control all trackers
         TrackerManager trackerManager = TrackerManager.getInstance();
+
         //deinit marker tracker
         trackerManager.deinitTracker(MarkerTracker.getClassType());
+
         //deinit Image tracker
         trackerManager.deinitTracker(ImageTracker.getClassType());
     }
@@ -493,31 +442,21 @@ public class MainManager implements ApplicationControl{
 
         // Create the 3D renderer and set textures
         mainRenderManager = new MainRenderManager(cameraManager);
-        mainRenderManager.setTextures(vectorTextures);
+        mainRenderManager.setTextures(vectorTextures,vectorVideoTextures);
 
-        //region videotest
+        //Set videoplayback Manager
+        videoManager= new VideoManager(mainActivity,mainRenderManager);
+
         // The renderer comes has the OpenGL context, thus, loading to texture
         // must happen when the surface has been created. This means that we
         // can't load the movie from this thread (GUI) but instead we must
         // tell the GL thread to load it once the surface has been created.
-        for (int i = 0; i < NUM_TARGETS; i++)
-        {
-            mainRenderManager.setVideoPlayerHelper(i, mVideoPlayerHelper[i]);
-            mainRenderManager.requestLoad(i, mMovieName[i], 0, false);
-        }
-        //endregion
+        videoManager.loadMovie();
 
         // Set the renderer to 3D interface (SurfaceView)
         surfaceViewManager.setRenderer(mainRenderManager);
 
-        //region videotest
-        for (int i = 0; i < NUM_TARGETS; i++)
-        {
-            float[] temp = { 0f, 0f };
-            mainRenderManager.targetPositiveDimensions[i].setData(temp);
-            mainRenderManager.videoPlaybackTextureID[i] = -1;
-        }
-        //endregion
+        videoManager.setDimensions();
 
         mainRenderManager.mIsActive = true;
 

@@ -27,6 +27,14 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import dotcreek.ar_magazine.FullscreenPlayback;
 
+/**
+ * DotCreek
+ * Augmented Reality Magazine For Glass
+ * Edited by Kevin on november 2014
+ *
+ * VideoPlayerHelper: This is a fully external class that convert video in texture for rendering.
+ * PD: External classes rarely should be edited, please make a backup before edition.
+ */
 
 // Helper class for video playback functionality 
 public class VideoPlayerHelper implements OnPreparedListener,

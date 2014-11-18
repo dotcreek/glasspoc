@@ -158,7 +158,8 @@ public class MainActivity extends Activity {
                 if (gesture == Gesture.TAP) {
 
                     audioManager.playSoundEffect(Sounds.TAP);
-                    openOptionsMenu();
+                    //openOptionsMenu();
+                    mainManager.startVideo();
                     return true;
                 }
                 else if (gesture == Gesture.SWIPE_DOWN) {
@@ -198,9 +199,6 @@ public class MainActivity extends Activity {
         }
         return false;
     }
-
-
-
 
 
 }
