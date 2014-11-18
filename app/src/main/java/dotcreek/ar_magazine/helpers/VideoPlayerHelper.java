@@ -25,8 +25,6 @@ import android.view.Surface;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import dotcreek.ar_magazine.FullscreenPlayback;
-
 /**
  * DotCreek
  * Augmented Reality Magazine For Glass

@@ -29,8 +29,8 @@ import java.util.Vector;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import dotcreek.ar_magazine.KeyFrameShaders;
-import dotcreek.ar_magazine.VideoPlaybackShaders;
+import dotcreek.ar_magazine.helpers.KeyFrameShaders;
+import dotcreek.ar_magazine.helpers.VideoPlaybackShaders;
 import dotcreek.ar_magazine.helpers.VideoPlayerHelper;
 import dotcreek.ar_magazine.media.AObject;
 import dotcreek.ar_magazine.media.CObject;

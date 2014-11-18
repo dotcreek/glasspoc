@@ -1,5 +1,5 @@
 
-package dotcreek.ar_magazine;
+package dotcreek.ar_magazine.helpers;
 
 import android.app.Activity;
 import android.content.Intent;
